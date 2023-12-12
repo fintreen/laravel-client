@@ -306,6 +306,9 @@ $fintreenModel->check(function ($successfullTransaction) use ($someData) {
     // Code to deposit amount to user balance
 });
 ```
+
+!! Note, that callback fires only if transaction is successful.
+
 **Event method:**
 
 When transaction is successful `FintreenTransactionIsSuccess` event is triggered. 
@@ -318,7 +321,7 @@ Event::listen(FintreenTransactionIsSuccess::class, function ($event) {
 });
 
 ```
-
+!! Note, that event fires only if transaction is successful.
 
 ### 6. Using webhook
 
@@ -327,16 +330,23 @@ Event::listen(FintreenTransactionIsSuccess::class, function ($event) {
 You can set existing webhook to retrive data when transaction is checked.
 By default it uses `/fintreen/webhook` but you **still** need to set it on your settings in https://fintreen.com/account/tokens at Update webhook section.
 
-If you are using existing webhook, by default it will run `check` method on `FintreenModel` to handle transaction there.
+If you are using existing webhook, by default it will run `check` method on `FintreenModel` to handle transaction there. This method will mark transaction as successful and fire `FintreenTransactionIsSuccess` event.
 
-#### 6.1 Using custom webhook
+#### 6.2 Using custom webhook
 
 Example how to retrieve data by custom webhook.
 
 1) create route
 2) check its working with post
-3) set it in your account settings
+3) set it in your account settings https://fintreen.com/account/tokens at Update webhook section
 4) get the data
+
+In your routes/web.php
+```php 
+Route::post('/fintreen/webhook', [YourController::class,'yourWebHookAction' ])->name('fintreen-webhook');
+```
+
+
 
 ### 7. Good practices and Exception handling
 
