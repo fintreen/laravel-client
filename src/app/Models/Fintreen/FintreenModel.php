@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Fintreen\FintreenClient;
 use Fintreen\Laravel\App\Exceptions\FintreenClientException;
-use Backpack\Settings\app\Models\Setting as BackPackSettings;
 
 class FintreenModel extends Model
 {
@@ -39,8 +38,8 @@ class FintreenModel extends Model
 
     private function loadToken() {
         $token = null;
-        if (config('fintreen.useConfigFromBackpackSettings') && class_exists('BackPackSettings')) {
-            $token = Setting::get('fintreen_token');
+        if (config('fintreen.useConfigFromBackpackSettings') && class_exists('Backpack\Settings\app\Models\Setting')) {
+            $token = \Backpack\Settings\app\Models\Setting::get('fintreen_token');
         }
         if (!$token) {
             $token =  config('fintreen.token');
@@ -50,8 +49,8 @@ class FintreenModel extends Model
 
     private function loadEmail() {
         $email = null;
-        if (config('fintreen.useConfigFromBackpackSettings') && class_exists('BackPackSettings')) {
-            $email = Setting::get('fintreen_email');
+        if (config('fintreen.useConfigFromBackpackSettings') && class_exists('Backpack\Settings\app\Models\Setting')) {
+            $email = \Backpack\Settings\app\Models\Setting::get('fintreen_email');
         }
         if (!$email) {
             $email =  config('fintreen.email');
