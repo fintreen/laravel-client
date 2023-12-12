@@ -17,14 +17,17 @@ return new class extends Migration
     {
         Schema::create('fintreen_transactions', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('fintreen_id');
             $table->unsignedDecimal('fiat_amount', 35, 2)->nullable(false);
             $table->string('fintreen_fiat_code')->default('EUR');
             $table->unsignedDecimal('crypto_amount', 35, 12)->nullable(false);
             $table->string('fintreen_crypto_code');
             $table->unsignedSmallInteger('fintreen_status_id')->default(1);
-            $table->unsignedSmallInteger('isTest')->default(0);
+            $table->unsignedSmallInteger('is_test')->default(0);
             $table->text('link');
             $table->timestamps();
+
+            $table->unique(['fintreen_id', 'is_test']);
         });
 
         if ($backPackSettings = @config('backpack.settings.table_name')) {

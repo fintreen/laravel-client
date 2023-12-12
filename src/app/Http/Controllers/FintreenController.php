@@ -25,4 +25,8 @@ class FintreenController {
         }
         return Response::json($json);
     }
+
+    public function webHookAction(Request $request) {
+
+    }
 }

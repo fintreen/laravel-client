@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Fintreen\Laravel\app\Models\Fintreen;
 
+use Fintreen\Laravel\app\Events\FintreenTransactionIsSuccess;
 use Fintreen\Laravel\app\Exceptions\FintreenApiException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,17 +25,17 @@ class FintreenModel extends Model
 
     public const DEFAULT_FIAT_CODE = 'EUR';
 
+    public const TRANSACTION_NEW_STATUS = 1;
+    public const TRANSACTION_SUCCESS_STATUS = 3;
+
     protected $fintreenClient;
 
     static private $fintreenCurrencies = [];
 
+    protected bool $isTest = false;
+
     static protected function getCurrenciesCacheTtl(): int {
         return self::CACHE_CURRENCIES_TTL_MIN_DEFAULT;
-    }
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
     }
 
     private function loadToken() {
@@ -59,7 +60,7 @@ class FintreenModel extends Model
         return $email;
     }
 
-    public function initClient(string|null $token = null, string|null $email = null, bool $isTest = null): FintreenClient {
+    public function initClient(string|null $token = null, string|null $email = null, bool $isTest = null, bool $ignoreSslVerif = false): FintreenClient {
         if (!$token) {
             $token = $this->loadToken();
         }
@@ -69,8 +70,14 @@ class FintreenModel extends Model
         if (is_null($isTest)) {
             $isTest =  config('fintreen.isTest');
         }
+        $this->isTest = $isTest;
 
-        $this->fintreenClient = new FintreenClient($token, $email, $isTest);
+        try {
+            $this->fintreenClient = new FintreenClient($token, $email, $isTest, $ignoreSslVerif);
+        } catch (\Exception $e) {
+            throw new FintreenClientException();
+        }
+
         return $this->fintreenClient;
     }
 
@@ -95,20 +102,45 @@ class FintreenModel extends Model
         return self::$fintreenCurrencies;
     }
 
+    /**
+     * @param float $amount
+     * @param string $cryptoCode
+     * @return array|null
+     * @throws FintreenApiException
+     * @throws FintreenClientException
+     */
     public function createTransaction(float $amount, string $cryptoCode): array|null {
         $createdTransaction = $this->getClient()->createTransaction($amount, $cryptoCode);
         if (isset($createdTransaction['status']) && $createdTransaction['status'] == 'OK') {
             $fintreenItem = new self();
+            $fintreenItem->fintreen_id = $createdTransaction['data']['id'];
             $fintreenItem->fiat_amount = $amount;
             $fintreenItem->fintreen_fiat_code = self::DEFAULT_FIAT_CODE;
             $fintreenItem->crypto_amount = $createdTransaction['data']['amount'];
             $fintreenItem->fintreen_crypto_code = $createdTransaction['data']['cryptoCode'];
             $fintreenItem->fintreen_status_id = $createdTransaction['data']['statusId'];
             $fintreenItem->link = $createdTransaction['data']['link'];
+            if (isset($createdTransaction['isTest'])) {
+                $fintreenItem->is_test = (int)$createdTransaction['isTest'];
+            } else {
+                $fintreenItem->is_test = (int)$this->isTest;
+            }
             $fintreenItem->save();
             return [$createdTransaction['data']['link'], $createdTransaction];
         } else {
             throw new FintreenApiException();
+        }
+    }
+
+    public function check(callable|null $onSuccess = null) {
+        $checkedTransaction = $this->getClient()->checkTransaction($this->fintreen_id);
+        if ($checkedTransaction['data']['status'] == self::TRANSACTION_SUCCESS_STATUS) {
+            $this->update(['fintreen_status_id' => self::TRANSACTION_SUCCESS_STATUS]);
+            event(new FintreenTransactionIsSuccess($this));
+            // Check the transaction
+            if (is_callable($onSuccess)) {
+                $onSuccess($this);
+            }
         }
     }
 
