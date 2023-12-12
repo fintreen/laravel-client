@@ -29,8 +29,9 @@ Use composer2 for package installation.
 ```dotenv
 #set true if you are using Laravel Backpack
 FINTREEN_USE_BAKCPACK=false
-FINTREEN_TOKEN=yourfintreentoken 
-FINTREEN_EMAIL=yourfintreenemail 
+FINTREEN_TEST_MODE=false
+FINTREEN_TOKEN="yourfintreentoken" 
+FINTREEN_EMAIL="yourfintreenemail"
 
 ```
 

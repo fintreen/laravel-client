@@ -2,7 +2,7 @@
 
 namespace Fintreen\Laravel\app\Http\Controllers;
 
-use Fintreen\Laravel\App\Models\Fintreen\FintreenModel;
+use Fintreen\Laravel\app\Models\Fintreen\FintreenModel;
 use Backpack\Settings\app\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;

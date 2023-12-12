@@ -46,13 +46,15 @@ class FintreenServiceProvider extends ServiceProvider
 
     public function publishFiles()
     {
-        $configFiles = [__DIR__.'/config' => config_path()];
+        $this->publishes([__DIR__.'/config/fintreen.php' => config_path('fintreen.php')]);
 
+        $configFiles = [__DIR__.'/config' => config_path()];
 
         $minimum = [
             $configFiles
         ];
         $this->publishes($configFiles, 'config');
+
 
         $this->publishes($minimum, 'minimum');
     }
