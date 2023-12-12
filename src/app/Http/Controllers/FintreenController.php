@@ -5,6 +5,7 @@ namespace Fintreen\Laravel\app\Http\Controllers;
 use Fintreen\Laravel\app\Models\Fintreen\FintreenModel;
 use Backpack\Settings\app\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
 class FintreenController {
@@ -27,6 +28,7 @@ class FintreenController {
     }
 
     public function webHookAction(Request $request) {
-
+        $input_json = file_get_contents('php://input');
+        Log::debug($input_json);
     }
 }
