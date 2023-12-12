@@ -50,6 +50,11 @@ composer req fintreen/laravel-client
 ```shell
 php artisan vendor:publish --tag=config
 ```
+#### 4. Migrate
+
+```shell
+php artisan migrate
+```
 
 ### Laravel BackPack + Settings integration
 
@@ -149,6 +154,80 @@ $calcData = $fintreen->getClient()->calculate($amount, $cryptoCodes);
 ```
 
 Note that in custom variant you can set parameters for initClient and use comma-separated crypto codes calculate method. 
+
+### 3. Create transaction 
+
+```php
+[$linkToRedirect, $createdTransaction] = $fintreen->createTransaction($amount, $cryptoCode);
+return redirect($linkToRedirect); // Redirect user to gateway link
+```
+
+Example with validation in real project:
+
+```php
+
+$fintreen = new FintreenModel();
+$fintreen->initClient();
+$this->data['fintreenCurrencies'] = $fintreen->getCurrenciesList();
+
+if ($request->isMethod('post')) {
+    $error = false;
+    $token = $request->post('g-recaptcha-response');
+    $cryptoCode = $request->post('crypto-code');
+    $amount = (float)$request->post('amount');
+    $captchaValidaion = $this->validateRecaptcha($token, 'submit');
+    if (!$captchaValidaion) {
+        $error = true;
+        $this->data['validationErrors'][] = 'Google recaaptcha check failed';
+    }
+    if (!$amount) {
+        $error = true;
+        $this->data['validationErrors'][] = 'Minimum amount is ' . FintreenModel::MIN_EURO_AMOUNT_DEFAULT;
+    }
+    if (isset($this->data['fintreenCurrencies']['crypto'])) {
+        $exists = false;
+        foreach ($this->data['fintreenCurrencies']['crypto'] as $fintreenCryptoCurrency) {
+            if ($fintreenCryptoCurrency['code'] == $cryptoCode) {
+                if ( $fintreenCryptoCurrency['min_eur_api'] > $amount) {
+                    $error = true;
+                    $this->data['validationErrors'][] = 'Minimum amount is ' . $fintreenCryptoCurrency['min_eur_api'];
+                }
+                $exists = true;
+                break;
+            }
+
+        }
+        if (!$exists) {
+            $error = true;
+            $this->data['validationErrors'][] = 'Crypto code validation error';
+        }
+    } else {
+        $error = true;
+        $this->data['validationErrors'][] = 'Crypto code validation error';
+    }
+
+    if ($error === false) {
+        try {
+            [$linkToRedirect, $createdTransaction] = $fintreen->createTransaction($amount, $cryptoCode);
+            return redirect($linkToRedirect);
+        } catch (FintreenApiException $e) {
+            Log::channel('fintreen_deposit')->debug($e->getMessage(), ['context' => $e]);
+            $this->data['validationErrors'][] = 'Something went wrong';
+        } catch (\Exception $e) {
+            Log::channel('fintreen_deposit')->debug($e->getMessage(), ['context' => $e]);
+            $this->data['validationErrors'][] = 'Something went wrong';
+        }
+    }
+}
+```
+
+### 4. Transaction list and check
+### 5. Using webhook
+### 6. How to deposit if transaction is successful
+
+### 7. Good practices and Exception handling
+
+It would be good to use own logging channel for this library.
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
