@@ -29,6 +29,7 @@ class FintreenModel extends Model
 
     protected $casts = [
         'is_test' => 'boolean',
+        'user_id' => 'int',
         'fintreen_id' => 'int',
         'fintreen_status_id' => 'int',
         'fiat_amount' => 'float',
@@ -139,6 +140,11 @@ class FintreenModel extends Model
                 $fintreenItem->is_test = (int)$createdTransaction['isTest'];
             } else {
                 $fintreenItem->is_test = (int)$this->isTest;
+            }
+            if ($userId = \Auth::id()) {
+                $fintreenItem->user_id = $userId;
+            } else {
+                $fintreenItem->user_id = null;
             }
             $fintreenItem->save();
             return [$createdTransaction['data']['link'], $createdTransaction];

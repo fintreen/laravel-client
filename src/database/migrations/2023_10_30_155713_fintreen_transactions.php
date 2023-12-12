@@ -18,6 +18,7 @@ return new class extends Migration
         Schema::create('fintreen_transactions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('fintreen_id');
+            $table->unsignedBigInteger('user_id')->nullable(true);
             $table->unsignedDecimal('fiat_amount', 35, 2)->nullable(false);
             $table->string('fintreen_fiat_code')->default('EUR');
             $table->unsignedDecimal('crypto_amount', 35, 12)->nullable(false);
