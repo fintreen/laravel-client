@@ -17,7 +17,7 @@ Fintreen.com laravel client for crypto-payment gateway API
     .
     <br />
     <br />
-    <a href="https://github.com/fintreen/php-client/issues">>>> PHP Client <<<</a>
+    <a href="https://github.com/fintreen/php-client">>>> PHP Client <<<</a>
   </p>
 </div>
 
