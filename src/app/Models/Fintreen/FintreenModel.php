@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Fintreen\Laravel\App\Models\Fintreen;
+namespace Fintreen\Laravel\app\Models\Fintreen;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

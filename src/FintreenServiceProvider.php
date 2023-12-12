@@ -16,6 +16,7 @@ class FintreenServiceProvider extends ServiceProvider
 
         $this->loadRoutes();
         //$this->loadConfigs();
+        $this->publishFiles();
         $this->publisMigrations();
         //$this->publishFiles();
         // register the artisan commands
@@ -40,7 +41,7 @@ class FintreenServiceProvider extends ServiceProvider
 
     public function publisMigrations() {
         // Load migrations
-        $this->loadMigrationsFrom(__DIR__.'/Migrations');
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
     }
 
     public function publishFiles()

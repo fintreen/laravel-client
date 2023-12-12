@@ -1,7 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace Fintreen\Laravel\app\Http\Controllers;
 
 use Fintreen\Laravel\App\Models\Fintreen\FintreenModel;
 use Backpack\Settings\app\Models\Setting;

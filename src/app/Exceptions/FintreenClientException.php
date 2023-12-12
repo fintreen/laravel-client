@@ -1,6 +1,6 @@
 <?php
 
-namespace Fintreen\Laravel\App\Exceptions;
+namespace Fintreen\Laravel\app\Exceptions;
 
 use Exception;
 
