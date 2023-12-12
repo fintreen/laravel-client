@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Fintreen\Laravel\app\Models\Fintreen;
 
+use Fintreen\Laravel\app\Exceptions\FintreenApiException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -94,6 +95,22 @@ class FintreenModel extends Model
         return self::$fintreenCurrencies;
     }
 
+    public function createTransaction(float $amount, string $cryptoCode): array|null {
+        $createdTransaction = $this->getClient()->createTransaction($amount, $cryptoCode);
+        if (isset($createdTransaction['status']) && $createdTransaction['status'] == 'OK') {
+            $fintreenItem = new self();
+            $fintreenItem->fiat_amount = $amount;
+            $fintreenItem->fintreen_fiat_code = self::DEFAULT_FIAT_CODE;
+            $fintreenItem->crypto_amount = $createdTransaction['data']['amount'];
+            $fintreenItem->fintreen_crypto_code = $createdTransaction['data']['cryptoCode'];
+            $fintreenItem->fintreen_status_id = $createdTransaction['data']['statusId'];
+            $fintreenItem->link = $createdTransaction['data']['link'];
+            $fintreenItem->save();
+            return [$createdTransaction['data']['link'], $createdTransaction];
+        } else {
+            throw new FintreenApiException();
+        }
+    }
 
 
 }
