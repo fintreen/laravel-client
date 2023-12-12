@@ -272,16 +272,15 @@ use Fintreen\Laravel\app\Models\Fintreen\FintreenModel;
 //***
 
 $fintreenModel = new FintreenModel();
-$fintreenModel->initClient();
 
-$fintreenModel->find(1); // Use local id here
-
-$fintreenModel->check();
+$modelItem = $fintreenModel->find(1); // Use local id here
+$modelItem->initClient(); // 
+$modelItem->check();
 
 // ! Or use callable 
 
 // Callback usage in the application
-$fintreenModel->check($transactionId, function ($successfullTransaction) {
+$modelItem->check(function ($successfullTransaction) {
     // Code to deposit amount to user balance
 });
 
@@ -295,7 +294,7 @@ $fintreenModel->check($transactionId, function ($successfullTransaction) {
 
 The `check` method on `FintreenModel` can get callback. In case that transaction is paid it will:
 1) update status in table
-2) then fire event `FintreenTransactionIsSuccess` 
+2) then dispatch event `FintreenTransactionIsSuccess` 
 3) if callback is set it will fire the callback.
 
 There are 2 ways - use custom check with callable as described above and events subscribtion.
@@ -321,7 +320,57 @@ Event::listen(FintreenTransactionIsSuccess::class, function ($event) {
 });
 
 ```
-!! Note, that event fires only if transaction is successful.
+
+To create it read https://laravel.com/docs/10.x/events#registering-events-and-listeners 
+
+```shell 
+php artisan make:listener FintreenTransactionIsSuccessListener
+```
+
+Example of listiner
+
+```php 
+<?php
+
+namespace App\Listeners;
+
+use Fintreen\Laravel\app\Events\FintreenTransactionIsSuccess;
+
+class FintreenTransactionIsSuccessListener
+{
+
+    /**
+     * Create the event listener.
+     *
+     * @return void
+     */
+    public function __construct()
+    {}
+
+    /**
+     * Handle the event.
+     *
+     * @param  object  $event
+     * @return void
+     */
+    public function handle(FintreenTransactionIsSuccess $event)
+    {
+        $a = 1;
+    }
+}
+
+```
+
+Dont forget to register it at your App\Providers\EventServiceProvider
+
+```php 
+FintreenTransactionIsSuccess::class => [
+    FintreenTransactionIsSuccessListener::class
+]
+```
+
+
+!! Note, that event dispatches only if transaction is successful.
 
 ### 6. Using webhook
 
@@ -330,7 +379,7 @@ Event::listen(FintreenTransactionIsSuccess::class, function ($event) {
 You can set existing webhook to retrive data when transaction is checked.
 By default it uses `/fintreen/webhook` but you **still** need to set it on your settings in https://fintreen.com/account/tokens at Update webhook section.
 
-If you are using existing webhook, by default it will run `check` method on `FintreenModel` to handle transaction there. This method will mark transaction as successful and fire `FintreenTransactionIsSuccess` event.
+If you are using existing webhook, by default it will run `check` method on `FintreenModel` to handle transaction there. This method will mark transaction as successful and dispatch `FintreenTransactionIsSuccess` event.
 
 #### 6.2 Using custom webhook
 

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Fintreen\FintreenClient;
-use Fintreen\Laravel\App\Exceptions\FintreenClientException;
+use Fintreen\Laravel\app\Exceptions\FintreenClientException;
 
 class FintreenModel extends Model
 {
@@ -134,9 +134,10 @@ class FintreenModel extends Model
 
     public function check(callable|null $onSuccess = null) {
         $checkedTransaction = $this->getClient()->checkTransaction($this->fintreen_id);
-        if ($checkedTransaction['data']['status'] == self::TRANSACTION_SUCCESS_STATUS) {
+        if ($checkedTransaction['data']['statusId'] == self::TRANSACTION_SUCCESS_STATUS) {
             $this->update(['fintreen_status_id' => self::TRANSACTION_SUCCESS_STATUS]);
-            event(new FintreenTransactionIsSuccess($this));
+            // event(new FintreenTransactionIsSuccess($this));
+            FintreenTransactionIsSuccess::dispatch($this);
             // Check the transaction
             if (is_callable($onSuccess)) {
                 $onSuccess($this);

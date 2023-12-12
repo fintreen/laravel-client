@@ -13,7 +13,7 @@ class FintreenTransacionsCheck extends Command
      *
      * @var string
      */
-    protected $signature = 'fintreen:transactions:check {$localId?} {--limit=}';
+    protected $signature = 'fintreen:transactions:check {localId?} {--limit=}';
 
     /**
      * The console command description.
@@ -30,7 +30,6 @@ class FintreenTransacionsCheck extends Command
     public function handle()
     {
         $fintreen = new FintreenModel();
-        $fintreen->initClient();
         $transacitonIdToCheck =  $this->argument('localId');
         $limit = $this->option('limit');
         if ($transacitonIdToCheck) {
@@ -47,7 +46,8 @@ class FintreenTransacionsCheck extends Command
         foreach ($transactions as $fintreenTransaction) {
             // Usage in the application
             /** @var FintreenModel $fintreenTransaction */
-            $fintreenTransaction->check(function ($successfullTransaction) use ($successCount) {
+            $fintreenTransaction->initClient(null, null, (bool)$fintreenTransaction->is_test);
+            $fintreenTransaction->check(function ($successfullTransaction) use (&$successCount) {
                 // Code to deposit amount to user balance
                 ++$successCount;
             });
