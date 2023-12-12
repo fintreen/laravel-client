@@ -23,6 +23,21 @@ class FintreenModel extends Model
     public const MIN_EURO_AMOUNT_DEFAULT = 20;
     public const CACHE_CURRENCIES_KEY = 'fintreen-currencies';
 
+    protected $fillable = [
+        'fintreen_status_id'
+    ];
+
+    protected $casts = [
+        'is_test' => 'boolean',
+        'fintreen_id' => 'int',
+        'fintreen_status_id' => 'int',
+        'fiat_amount' => 'float',
+        'crypto_amount' => 'float',
+        'fintreen_fiat_code' => 'string',
+        'fintreen_crypto_code' => 'string',
+        'link' => 'string',
+    ];
+
     public const DEFAULT_FIAT_CODE = 'EUR';
 
     public const TRANSACTION_NEW_STATUS = 1;
