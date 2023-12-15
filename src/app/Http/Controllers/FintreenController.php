@@ -43,7 +43,10 @@ class FintreenController {
                 });
             }
         }
+        $response['successCount'] = $successCount;
         Log::debug($input_json);
+        Log::debug($response);
+        return response()->json($response);
         // Find transaction anc check it
     }
 }
