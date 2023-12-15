@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Response;
 
 class FintreenController {
 
+    public const TYPE_TO_CHECK = 'TRANSACTION_WEBHOOK_PAID_CHECK';
+
     public function calculateAction(Request $request) {
         $json['message'] = 'Calculation error!';
         $json['status'] = 0;
@@ -29,6 +31,19 @@ class FintreenController {
 
     public function webHookAction(Request $request) {
         $input_json = file_get_contents('php://input');
+        $successCount = 0;
+        $decoded = @json_decode($input_json, true);
+        if ($decoded && isset($decoded['transaction_id']) && isset($decoded['type']) && $decoded['type'] == self::TYPE_TO_CHECK) {
+            $existingTransaction = FintreenModel::where('fintreen_id')->first();
+            if (!empty($existingTransaction->id)) {
+                $existingTransaction->initClient(null, null, (bool)$existingTransaction->is_test);
+                $existingTransaction->check(function ($successfullTransaction) use (&$successCount) {
+                    // Code to deposit amount to user balance but not that event will b fired
+                    ++$successCount;
+                });
+            }
+        }
         Log::debug($input_json);
+        // Find transaction anc check it
     }
 }
