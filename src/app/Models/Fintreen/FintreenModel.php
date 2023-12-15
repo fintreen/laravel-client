@@ -155,7 +155,7 @@ class FintreenModel extends Model
 
     public function check(callable|null $onSuccess = null) {
         $checkedTransaction = $this->getClient()->checkTransaction($this->fintreen_id);
-        if ($checkedTransaction['data']['statusId'] == self::TRANSACTION_SUCCESS_STATUS) {
+        if (isset($checkedTransaction['data']['statusId']) && $checkedTransaction['data']['statusId'] == self::TRANSACTION_SUCCESS_STATUS) {
             $this->update(['fintreen_status_id' => self::TRANSACTION_SUCCESS_STATUS]);
             // event(new FintreenTransactionIsSuccess($this));
             FintreenTransactionIsSuccess::dispatch($this);
