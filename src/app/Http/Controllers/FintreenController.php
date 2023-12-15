@@ -29,7 +29,8 @@ class FintreenController {
         return Response::json($json);
     }
 
-    public function webHookAction(Request $request) {
+    public function webHookAction(Request $request): \Symfony\Component\HttpFoundation\Response
+    {
         $input_json = file_get_contents('php://input');
         $successCount = 0;
         $decoded = @json_decode($input_json, true);
