@@ -377,7 +377,16 @@ FintreenTransactionIsSuccess::class => [
 #### 6.1 Using exsting webhook
 
 You can set existing webhook to retrive data when transaction is checked.
-By default it uses `/fintreen/webhook` but you **still** need to set it on your settings in https://fintreen.com/account/tokens at Update webhook section.
+By default it uses `/fintreen/webhook` but you **still** need to set it on your settings in https://fintreen.com/account/tokens at Update webhook section AND ignore CSFR in this POST request the middleware.
+To do that please edit your **VerifyCsrfToken** at **App\Http\Middleware\VerifyCsrfToken**
+
+```php 
+    protected $except = [
+        'fintreen/webhook'
+    ];
+
+```
+
 
 If you are using existing webhook, by default it will run `check` method on `FintreenModel` to handle transaction there. This method will mark transaction as successful and dispatch `FintreenTransactionIsSuccess` event.
 
@@ -386,14 +395,37 @@ If you are using existing webhook, by default it will run `check` method on `Fin
 Example how to retrieve data by custom webhook.
 
 1) create route
-2) check its working with post
+2) check its working with POST request without Csrf
 3) set it in your account settings https://fintreen.com/account/tokens at Update webhook section
 4) get the data
 
 In your routes/web.php
 ```php 
-Route::post('/fintreen/webhook', [YourController::class,'yourWebHookAction' ])->name('fintreen-webhook');
+Route::post('/your/fintreen/webhook/path', [YourController::class,'yourWebHookAction' ])
+->name('fintreen-webhook')
+->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 ```
+
+
+#### 6.3 Webhook format
+
+Format is json:
+
+```json 
+{"type":"TRANSACTION_WEBHOOK_PAID_CHECK","transaction_id":154}
+```
+
+To retrieve webhook data to check transaction you can use:
+```php
+$input = file_get_contents('php://input');
+$dataSent = json_decode($input);
+
+/// OR
+$transacitonId = $request->post('transaction_id');
+
+```
+
+
 
 
 
